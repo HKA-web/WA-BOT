@@ -21,6 +21,13 @@ const fs = require('fs');
 const axios = require('axios');
 const { downloadContentFromMessage } = require("baileys");
 const sharp = require('sharp');
+const path = require("path");
+const ffmpeg = require("fluent-ffmpeg");
+const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
+ffmpeg.setFfmpegPath(ffmpegPath);
+
+// Pastikan folder tmp ada
+if (!fs.existsSync("./tmp")) fs.mkdirSync("./tmp");
 
 // Import Scrape
 const Ai4Chat = require('./scrape/Ai4Chat');
@@ -303,40 +310,78 @@ case "yt": {
 break;
 
 case "stiker": {
-	const { extendedTextMessage } = msg.message || {};
+    const { extendedTextMessage } = msg.message || {};
 
-	// Pastikan reply gambar
-	if (
-		!extendedTextMessage ||
-		!extendedTextMessage.contextInfo ||
-		!extendedTextMessage.contextInfo.quotedMessage ||
-		!extendedTextMessage.contextInfo.quotedMessage.imageMessage
-	) {
-		await lenwy.sendMessage(
-			sender,
-			{ text: 'Reply gambar dengan "!stiker" untuk dijadikan stiker.' },
-			{ quoted: msg }
-		);
-		break;
-	}
-	lenwyreply(mess.wait);
-	const quotedImage = extendedTextMessage.contextInfo.quotedMessage.imageMessage;
-	
-	// Download media
-	const imageBuffer = await downloadMedia(quotedImage, "image");
+    if (
+        !extendedTextMessage ||
+        !extendedTextMessage.contextInfo ||
+        !extendedTextMessage.contextInfo.quotedMessage ||
+        (!extendedTextMessage.contextInfo.quotedMessage.imageMessage &&
+         !extendedTextMessage.contextInfo.quotedMessage.videoMessage &&
+         !extendedTextMessage.contextInfo.quotedMessage.documentMessage)
+    ) {
+        await lenwy.sendMessage(
+            sender,
+            { text: 'Reply gambar atau GIF/video dengan "!stiker" untuk dijadikan stiker.' },
+            { quoted: msg }
+        );
+        break;
+    }
 
-	// Konversi ke stiker
-	const stickerBuffer = await sharp(imageBuffer)
-		.resize(512, 512, { fit: "contain" })
-		.webp({ quality: 100 })
-		.toBuffer();
+    lenwyreply(mess.wait);
 
-	// Kirim stiker
-	await lenwy.sendMessage(
-		sender,
-		{ sticker: stickerBuffer },
-		{ quoted: msg }
-	);
+    const quotedMessage = extendedTextMessage.contextInfo.quotedMessage;
+    let mediaBuffer;
+
+    if (quotedMessage.imageMessage) {
+        // Konversi image ke WebP
+        mediaBuffer = await downloadMedia(quotedMessage.imageMessage, "image");
+        mediaBuffer = await sharp(mediaBuffer)
+            .resize(512, 512, { fit: "contain" })
+            .webp({ quality: 100 })
+            .toBuffer();
+    } else if (quotedMessage.videoMessage || quotedMessage.documentMessage) {
+        const isGIF = quotedMessage.documentMessage?.mimetype === "image/gif";
+        const tempInput = `./tmp/input_${Date.now()}.${isGIF ? "gif" : "mp4"}`;
+        const tempOutput = `./tmp/output_${Date.now()}.webp`;
+
+        // Simpan buffer ke file sementara
+        mediaBuffer = await downloadMedia(
+            quotedMessage.videoMessage || quotedMessage.documentMessage,
+            isGIF ? "document" : "video"
+        );
+        fs.writeFileSync(tempInput, mediaBuffer);
+
+        // Konversi ke WebP pakai ffmpeg
+        await new Promise((resolve, reject) => {
+            ffmpeg(tempInput)
+                .inputFormat(isGIF ? "gif" : "mp4")
+                .outputOptions([
+                    "-vcodec", "libwebp",
+                    "-filter:v", "scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,fps=15",
+                    "-loop", "0",
+                    "-preset", "default",
+                    "-an",
+                    "-vsync", "0"
+                ])
+                .toFormat("webp")
+                .save(tempOutput)
+                .on("end", resolve)
+                .on("error", reject);
+        });
+
+        mediaBuffer = fs.readFileSync(tempOutput);
+
+        // Hapus file sementara
+        fs.unlinkSync(tempInput);
+        fs.unlinkSync(tempOutput);
+    }
+
+    await lenwy.sendMessage(
+        sender,
+        { sticker: mediaBuffer },
+        { quoted: msg }
+    );
 }
 break;
 
