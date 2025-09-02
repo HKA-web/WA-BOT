@@ -19,10 +19,13 @@ require('./len')
 require('./database/Menu/LenwyMenu')
 const fs = require('fs');
 const axios = require('axios');
+const { downloadContentFromMessage } = require("baileys");
+const sharp = require('sharp');
 
 // Import Scrape
 const Ai4Chat = require('./scrape/Ai4Chat');
 const tiktok2 = require('./scrape/Tiktok');
+const youtube = require('./scrape/YouTube');
 const zenquotes = require('./scrape/Quote');
 const usetubes = require('./scrape/UseTube');
 const XLSX = require("xlsx");
@@ -59,6 +62,21 @@ async function broadcast(data, quotedMsg) {
         }
         // Delay kecil agar tidak terblokir
         await new Promise(resolve => setTimeout(resolve, 10000));
+    }
+}
+
+// Fungsi helper download media
+async function downloadMedia(message, type) {
+    try {
+        const stream = await downloadContentFromMessage(message, type);
+        let buffer = Buffer.from([]);
+        for await (const chunk of stream) {
+            buffer = Buffer.concat([buffer, chunk]);
+        }
+        return buffer;
+    } catch (err) {
+        console.error("Gagal download media:", err);
+        throw err;
     }
 }
 
@@ -232,18 +250,6 @@ case "broadcast": {
 }
 break;
 
-case "send": {
-	
-	await lenwy.sendMessage(
-		'6285648007953@s.whatsapp.net',
-			{
-				text: '🎉 coba',
-			},
-		{ quoted: msg }
-	);
-}
-break;
-
 case "example": {
 	const data = [];
     if (!q) return lenwyreply("☘️ *Contoh:* !example pemrograman?");
@@ -295,6 +301,68 @@ case "yt": {
 	lenwyreply("✅ Pencarian Selesai!");
 }
 break;
+
+case "stiker": {
+	const { extendedTextMessage } = msg.message || {};
+
+	// Pastikan reply gambar
+	if (
+		!extendedTextMessage ||
+		!extendedTextMessage.contextInfo ||
+		!extendedTextMessage.contextInfo.quotedMessage ||
+		!extendedTextMessage.contextInfo.quotedMessage.imageMessage
+	) {
+		await lenwy.sendMessage(
+			sender,
+			{ text: 'Reply gambar dengan "!stiker" untuk dijadikan stiker.' },
+			{ quoted: msg }
+		);
+		break;
+	}
+	lenwyreply(mess.wait);
+	const quotedImage = extendedTextMessage.contextInfo.quotedMessage.imageMessage;
+	
+	// Download media
+	const imageBuffer = await downloadMedia(quotedImage, "image");
+
+	// Konversi ke stiker
+	const stickerBuffer = await sharp(imageBuffer)
+		.resize(512, 512, { fit: "contain" })
+		.webp({ quality: 100 })
+		.toBuffer();
+
+	// Kirim stiker
+	await lenwy.sendMessage(
+		sender,
+		{ sticker: stickerBuffer },
+		{ quoted: msg }
+	);
+}
+break;
+
+case "ytdl": {
+    if (!q) return lenwyreply("⚠ *Mana Link Youtube?*");
+        lenwyreply(mess.wait);
+	try {
+		const result = await youtube(q);
+
+		await lenwy.sendMessage(
+			sender,
+			{
+				video: { url: result.requested_downloads[0].url },
+				caption: `*🎁 Lenwy YouTube Downloader*\n\n${result.title} - (${result.requested_downloads[0].format_note})`
+			},
+			{ quoted: msg }
+		);
+
+	} catch (error) {
+		console.error("Error Youtube DL:", error);
+		lenwyreply(mess.error);
+	}
+
+}
+break;
+
         default: { lenwyreply(mess.default) }
     }
 }

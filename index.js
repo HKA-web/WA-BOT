@@ -15,7 +15,7 @@
 */
 
 // Import Module 
-const { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion } = require("baileys")
+const { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, downloadContentFromMessage } = require("baileys");
 const pino = require("pino")
 const chalk = require("chalk")
 const readline = require("readline")
@@ -40,35 +40,39 @@ const question = (text) => {
 // setting: kalau true maka pairing pakai code, kalau false maka scan QR
 let usePairingCode = false;
 
-async function index() {
+
+async function pairing() {
   try {
-    console.log("\Metode Pairing:");
-    console.log("1. QR");
-    console.log("2. Kode");
+	console.log("\Metode Pairing:");
+	console.log("1. QR");
+	console.log("2. Kode");
 
-    // 🔥 di sini pakai await
-    const choice = (await question("Plih (1 or 2): ")).trim();
+	// 🔥 di sini pakai await
+	const choice = (await question("Plih (1 or 2): ")).trim();
 
-    if (choice === "1") {
-      usePairingCode = false; // QR pakai scan
-      await connectToWhatsApp();
-    } else if (choice === "2") {
-      usePairingCode = true; // pairing code
-      await connectToWhatsApp();
-    } else {
-      console.log("❌ Tidak sesuai, pilih 1 atau 2.");
-      await index(); // ulangi prompt lagi
-    }
+	if (choice === "1") {
+	  usePairingCode = false; // QR pakai scan
+	} else if (choice === "2") {
+	  usePairingCode = true; // pairing code
+	} else {
+	  console.log("❌ Tidak sesuai, pilih 1 atau 2.");
+	}
   } catch (err) {
-    console.error("⚠️ Gagal Tersambung code:", err);
+	console.error("⚠️ Gagal Tersambung code:", err);
   }
 }
 
 async function connectToWhatsApp() {
   const { state, saveCreds } = await useMultiFileAuthState("./LenwySesi")
-
   const { version, isLatest } = await fetchLatestBaileysVersion()
   console.log(`Lenwy Using WA v${version.join(".")}, isLatest: ${isLatest}`)
+  
+  if (state.creds.me !== undefined) {
+	console.log(chalk.green("✔ Session sudah ready, langsung konek..."))
+  } else {
+	  await pairing();
+  }
+  
   let isqr = usePairingCode ? !true : usePairingCode;
   
   const lenwy = makeWASocket({
@@ -149,4 +153,4 @@ async function connectToWhatsApp() {
   })
 }
 
-index()
+connectToWhatsApp()

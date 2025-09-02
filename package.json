@@ -9,13 +9,16 @@
         "start": "node index.js"
     },
     "dependencies": {
+        "@whiskeysockets/baileys": "^6.7.19",
         "axios": "^1.4.0",
         "baileys": "6.7.17",
         "chalk": "^4.1.2",
         "pino": "^8.14.1",
         "qrcode-terminal": "^0.12.0",
         "readline": "1.3.0",
+        "sharp": "^0.32.6",
         "usetube": "^2.2.7",
-        "xlsx": "^0.18.5"
+        "xlsx": "^0.18.5",
+        "youtube-dl-exec": "^3.0.24"
     }
 }
