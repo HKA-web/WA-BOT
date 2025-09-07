@@ -15,11 +15,10 @@
 */
 
 // Custom Prefix
-global.admin = ['6287826765051@s.whatsapp.net'] // Sesuaikan Nomor Admin
-
+global.admin = ['6285648007953@s.whatsapp.net'] // Sesuaikan Nomor Admin
 global.prefix = '!'
-
 global.image = './database/image/KucingLucu.jpeg'
+global.menuMessages = global.menuMessages || new Map();
 
 // Custom Message
 global.mess = {

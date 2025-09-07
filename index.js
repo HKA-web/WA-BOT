@@ -133,6 +133,7 @@ async function connectToWhatsApp() {
     const body =
       msg.message.conversation ||
       msg.message.extendedTextMessage?.text ||
+	  msg.message.locationMessage ||
       ""
     const sender = msg.key.remoteJid
     const pushname = msg.pushName || "Lenwy"

@@ -1,9 +1,11 @@
-global.lenwymenu = `*Menu Bot Lenwy*
+global.lenwymenu = `*📋 MENU BOT*
 
-*> !Ai - Tanya Jawab AI*
-*> !Igdl - Download video Instagram*
-*> !Ttdl - Download video TikTok*
-*> !Tebakangka - Game Tebak angka*
-*> !Quote - Dapatkan Motivasi Hari Ini*
+*1.* 🤖 Tanya AI
+*2.* ▶️ YouTube
+*3.* 🎵 TikTok
+*4.* 💡 Quote
+*5.* 📢 Broadcast
+*6.* 🕌 Jadwal Sholat
+*7.* 🤔 Stiker
 
-*Youtube Channel : Lenwy*`
+Balas angka pilihan (misal: *1*)`
