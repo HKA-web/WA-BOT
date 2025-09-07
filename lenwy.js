@@ -143,6 +143,13 @@ module.exports = async (lenwy, m) => {
 		)
 	}
 	
+	
+	/*
+	if (msg.message?.imageMessage) {
+		const { extendedTextMessage } = msg.message || {};
+		console.log(msg.message.imageMessage);
+	}*/
+	
 	if (msg.message?.extendedTextMessage?.contextInfo?.quotedMessage) {
 		const quoted = msg.message.extendedTextMessage.contextInfo.quotedMessage;
 		const quotedText = quoted.conversation 
@@ -428,7 +435,15 @@ module.exports = async (lenwy, m) => {
 					}
 					
 					if (!locationMessage) {
-						return await lenwyreply(`⚠ *Tag Lokasimu*`);
+						const sentMsg = await lenwy.sendMessage(
+							sender,{
+								text: '⚠ *Tag Lokasimu*\n\nNavigasi:\n*99.* Kembali ke menu utama \n\n_Balas Pesan ini untuk kirim ulang!_',
+								mentions: [sender]
+							},
+							{ quoted: msg }
+						)
+						menuMessages.set(sentMsg.key.id, { param: 'pray' });
+						return;
 					}
 
 					try {
@@ -535,8 +550,84 @@ _Live Kiblat:_ https://qiblafinder.withgoogle.com/intl/ms/finder/ar
 						},{ quoted: msg }
 					)
 				} else {
-					const { extendedTextMessage } = msg.message || {};
-					console.log(extendedTextMessage);
+					try {
+						if (
+						  !msg.message?.imageMessage &&
+						  !msg.message?.videoMessage &&
+						  !(msg.message?.documentMessage?.mimetype === "image/gif")
+						) {
+						  const sentMsg = await lenwy.sendMessage(
+								sender,{
+									text: '⚠ Hanya boleh *Gambar / Video / Gif*\n\nNavigasi:\n*99.* Kembali ke menu utama \n\n_Balas Pesan ini untuk kirim ulang!_',
+									mentions: [sender]
+								},
+								{ quoted: msg }
+							)
+							menuMessages.set(sentMsg.key.id, { param: 'stiker' });
+							return;
+						}
+
+						ffmpeg.setFfmpegPath(ffmpegPath);
+					
+						// Pastikan folder tmp ada
+						if (!fs.existsSync("./tmp")) fs.mkdirSync("./tmp");
+						
+						lenwyreply(mess.wait);
+						if (msg.message?.imageMessage){
+							// Konversi image ke WebP
+							let media = msg.message.imageMessage;
+							mediaBuffer = await downloadMedia(media, "image");
+							mediaBuffer = await sharp(mediaBuffer)
+								.resize(512, 512, { fit: "contain" })
+								.webp({ quality: 100 })
+								.toBuffer();
+						} else if(msg.message?.videoMessage || msg.message?.documentMessage) {
+							const isGIF = msg.message.documentMessage?.mimetype === "image/gif";
+							const tempInput = `./tmp/input_${Date.now()}.${isGIF ? "gif" : "mp4"}`;
+							const tempOutput = `./tmp/output_${Date.now()}.webp`;
+							
+							// Simpan buffer ke file sementara
+							mediaBuffer = await downloadMedia(
+								msg.message.videoMessage || msg.message.documentMessage,
+								isGIF ? "document" : "video"
+							);
+							fs.writeFileSync(tempInput, mediaBuffer);
+							
+							// Konversi ke WebP pakai ffmpeg
+							await new Promise((resolve, reject) => {
+								ffmpeg(tempInput)
+									.inputFormat(isGIF ? "gif" : "mp4")
+									.duration(5) // maksimal 5 detik
+									.outputOptions([
+										"-vcodec", "libwebp",
+										"-filter:v", "scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,fps=15",
+										"-loop", "0",
+										"-preset", "default",
+										"-an",
+										"-vsync", "0"
+									])
+									.toFormat("webp")
+									.save(tempOutput)
+									.on("end", resolve)
+									.on("error", reject);
+							});
+
+							mediaBuffer = fs.readFileSync(tempOutput);
+
+							// Hapus file sementara
+							fs.unlinkSync(tempInput);
+							fs.unlinkSync(tempOutput);
+						}
+						await lenwy.sendMessage(
+							sender,
+							{ sticker: mediaBuffer },
+							{ quoted: msg }
+						);
+					} catch (err) {
+						console.error(err);
+						lenwyreply(mess.error);
+					}
+					
 				}
 			}
 		}
