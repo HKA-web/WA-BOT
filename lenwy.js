@@ -43,10 +43,13 @@ const youtube = require('./scrape/YouTube');
 const zenquotes = require('./scrape/Quote');
 const usetubes = require('./scrape/UseTube');
 const { getJadwalSholat, getQiblaDirection } = require('./scrape/Aladhan');
+const { getLetter, getVerse } = require('./scrape/EQuran');
 const openstreet = require('./scrape/OpenStreetMap');
 
 
 module.exports = async (lenwy, m) => {
+	const maxLength = 4000; // batas karakter per pesan
+	const maxBatch = 30; // batas batch
     const msg = m.messages[0];
     if (!msg.message) return;
 
@@ -112,6 +115,30 @@ module.exports = async (lenwy, m) => {
 		}
 	}
 	
+	async function sendInChunks(items, batchSize, maxLength, formatter, sendFunc, delayMs = 0) {
+	  let buffer = [];
+	  let bufferLength = 0;
+
+	  for (let item of items) {
+		const line = formatter(item); // format bebas via parameter
+		const lineLength = line.length + 2; // +2 untuk "\n\n"
+
+		if (buffer.length >= batchSize || (bufferLength + lineLength) > maxLength) {
+		  await sendFunc(buffer.join("\n\n"));
+		  buffer = [];
+		  bufferLength = 0;
+		  if (delayMs > 0) await sleep(delayMs); // jeda antar kirim
+		}
+
+		buffer.push(line);
+		bufferLength += lineLength;
+	  }
+
+	  if (buffer.length > 0) {
+		await sendFunc(buffer.join("\n\n"));
+	  }
+	}
+	
 	if (body.toLowerCase() == `menu`) {
 		await lenwy.sendMessage(
 			sender,{
@@ -121,13 +148,6 @@ module.exports = async (lenwy, m) => {
 			},{ quoted: msg }
 		)
 	}
-	
-	
-	/*
-	if (msg.message?.imageMessage) {
-		const { extendedTextMessage } = msg.message || {};
-		console.log(msg.message.imageMessage);
-	}*/
 	
 	if (msg.message?.extendedTextMessage?.contextInfo?.quotedMessage) {
 		const quoted = msg.message.extendedTextMessage.contextInfo.quotedMessage;
@@ -253,12 +273,39 @@ module.exports = async (lenwy, m) => {
 				case `1`:
 					const sentMsg = await lenwy.sendMessage(
 						sender,{
-							text: '🕌 Bagikan Lokasimu?\n\nNavigasi:\n*99.* Kembali ke menu utama \n\n_Balas Pesan ini!_',
+							text: '📍 Bagikan Lokasimu?\n\nNavigasi:\n*99.* Kembali ke menu utama \n\n_Balas Pesan ini!_',
 							mentions: [sender]
 						},
 						{ quoted: msg }
 					)
 					menuMessages.set(sentMsg.key.id, { param: 'pray' });
+					break;
+				case `2`:
+					lenwyreply(mess.wait);
+					try {
+						const response = await getLetter();
+						await sendInChunks(
+						  response.data,
+						  maxBatch,         // batch size
+						  maxLength,       // max char
+						  (row) => `*Nomor:* ${row.nomor}\n*Nama:* ${row.nama_latin} - ${row.nama}\n*Jumlah Ayat:* ${row.jumlah_ayat}\n*Tempat Turun:* ${row.tempat_turun}\n*Arti:* ${row.arti}_`,   // formatter
+						  async (chunk) => {
+							await lenwyreply(chunk); // fungsi kirim WA
+						  },
+						  2000,
+						);
+						const sentMsg = await lenwy.sendMessage(
+							sender,{
+								text: '📖 Nomor surat berapa?\n\nNavigasi:\n*99.* Kembali ke menu utama\n\n_Balas Pesan ini!_',
+								mentions: [sender]
+							},
+							{ quoted: msg }
+						)
+						menuMessages.set(sentMsg.key.id, { param: `quran`, });
+					} catch (error) {
+						console.error("Error:", error);
+						lenwyreply(mess.error);
+					}
 					break;
 				default: { lenwyreply(mess.default) }
 			}
@@ -421,7 +468,7 @@ module.exports = async (lenwy, m) => {
 						},{ quoted: msg }
 					)
 				} else {
-					let locationMessage = msg.message.locationMessage || null;
+					let locationMessage = msg.message.locationMessage;
 					if (locationMessage) {
 						try {
 							await lenwyreply(mess.wait);
@@ -443,15 +490,15 @@ module.exports = async (lenwy, m) => {
 								const now = dayjs().tz(timezone);
 
 								// Ambil tanggal hari ini
-								const today = now.format("YYYY-MM-DD");
+								const today = now.format("prevY-MM-DD");
 
 								const times = {
-								  Imsak: dayjs.tz(`${today} ${row.Imsak}`, "YYYY-MM-DD HH:mm", timezone),
-								  Fajr: dayjs.tz(`${today} ${row.Fajr}`, "YYYY-MM-DD HH:mm", timezone),
-								  Dhuhr: dayjs.tz(`${today} ${row.Dhuhr}`, "YYYY-MM-DD HH:mm", timezone),
-								  Asr: dayjs.tz(`${today} ${row.Asr}`, "YYYY-MM-DD HH:mm", timezone),
-								  Maghrib: dayjs.tz(`${today} ${row.Maghrib}`, "YYYY-MM-DD HH:mm", timezone),
-								  Isha: dayjs.tz(`${today} ${row.Isha}`, "YYYY-MM-DD HH:mm", timezone),
+								  Imsak: dayjs.tz(`${today} ${row.Imsak}`, "prevY-MM-DD HH:mm", timezone),
+								  Fajr: dayjs.tz(`${today} ${row.Fajr}`, "prevY-MM-DD HH:mm", timezone),
+								  Dhuhr: dayjs.tz(`${today} ${row.Dhuhr}`, "prevY-MM-DD HH:mm", timezone),
+								  Asr: dayjs.tz(`${today} ${row.Asr}`, "prevY-MM-DD HH:mm", timezone),
+								  Maghrib: dayjs.tz(`${today} ${row.Maghrib}`, "prevY-MM-DD HH:mm", timezone),
+								  Isha: dayjs.tz(`${today} ${row.Isha}`, "prevY-MM-DD HH:mm", timezone),
 								};
 
 								const prayerOrder = ["Imsak", "Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
@@ -475,12 +522,12 @@ module.exports = async (lenwy, m) => {
 									}
 
 									// Debug
-									// console.log('coba', now.isBetween(thisTime, nextTime), thisTime.format("YYYY-MM-DD HH:mm"), nextTime.format("YYYY-MM-DD HH:mm"));
+									// console.log('coba', now.isBetween(thisTime, nextTime), thisTime.format("prevY-MM-DD HH:mm"), nextTime.format("prevY-MM-DD HH:mm"));
 								}
 
 								// fallback kalau tidak ketemu (misal sebelum imsak)
 								if (!currentPrayer) currentPrayer = "Imsak";
-								// console.log("Sekarang:", now.format("YYYY-MM-DD HH:mm"));
+								// console.log("Sekarang:", now.format("prevY-MM-DD HH:mm"));
 								// console.log("Current prayer:", currentPrayer);
 
 								// Format jadwal dengan highlight
@@ -612,6 +659,102 @@ _Live Kiblat:_ https://qiblafinder.withgoogle.com/intl/ms/finder/ar
 						lenwyreply(mess.error);
 					}
 					
+				}
+			} else if (menuInfo.param === `quran`) {
+				if (body === '400') {
+					await lenwy.sendMessage(
+						sender,{
+							image: menuImage,
+							caption: lenwymenu,
+							mentions: [sender]
+						},{ quoted: msg }
+					)
+				} else if (body === '300') {
+					lenwyreply(mess.wait);
+					
+				} else if (body === '200') {
+					try {
+						const response = await getLetter(Number(next));
+						await lenwyreply(`*Nomer:* ${response.data.nomor}\n*Nama:* ${response.data.nama_latin} - ${response.data.nama}\n*Jumlah Ayat:* ${response.data.jumlah_ayat}\n*Tempat Turun:* ${response.data.tempat_turun}\n*Arti:* ${response.data.arti}\n*Deskripsi:* ${(response.data.deskripsi).replace(/<[^>]*>/g, "")}`);
+						await sleep(2000);
+						
+						await sendInChunks(
+						  response.data.ayat,
+						  maxBatch,         // batch size
+						  maxLength,       // max char
+						  (row) => `*${row.ar}\n${row.tr}\n_${row.idn}_`,   // formatter
+						  async (chunk) => {
+							await lenwyreply(chunk); // fungsi kirim WA
+							if (response.data?.surat_selanjutnya) {
+								  next = response.data?.surat_selanjutnya.nomor;
+							}
+							if (response.data?.surat_sebelumnya) {
+							  prev = response.data?.surat_sebelumnya.nomor;
+							}
+						  },
+						  3000,
+						);
+						await sleep(2000);
+						const sentMsg = await lenwy.sendMessage(
+							sender,{
+								text: '📖 Nomor surat lain?\n\nNavigasi:\n*200.* Selanjutnya\n*300.* Sebelumnya\n*400.* Kembali ke menu utama\n\n_Balas Pesan ini!_',
+								mentions: [sender]
+							},
+							{ quoted: msg }
+						)
+						menuMessages.set(sentMsg.key.id, { param: `quran`, });
+					} catch (error) {
+						console.error(`Error:`, error);
+						lenwyreply(mess.error);
+					}
+				} else {
+					lenwyreply(mess.wait);
+					try {
+						if(!isNaN(body)){
+							const response = await getLetter(Number(body));
+							await lenwyreply(`*Nomer:* ${response.data.nomor}\n*Nama:* ${response.data.nama_latin} - ${response.data.nama}\n*Jumlah Ayat:* ${response.data.jumlah_ayat}\n*Tempat Turun:* ${response.data.tempat_turun}\n*Arti:* ${response.data.arti}\n*Deskripsi:* ${(response.data.deskripsi).replace(/<[^>]*>/g, "")}`);
+							await sleep(2000);
+							
+							await sendInChunks(
+							  response.data.ayat,
+							  maxBatch,         // batch size
+							  maxLength,       // max char
+							  (row) => `*${row.ar}\n${row.tr}\n_${row.idn}_`,   // formatter
+							  async (chunk) => {
+								await lenwyreply(chunk); // fungsi kirim WA
+								if (response.data?.surat_selanjutnya) {
+								  next = response.data?.surat_selanjutnya.nomor;
+								}
+								if (response.data?.surat_sebelumnya) {
+								  prev = response.data?.surat_sebelumnya.nomor;
+								}
+							  },
+							  3000,
+							);
+							await sleep(2000);
+							const sentMsg = await lenwy.sendMessage(
+								sender,{
+									text: '📖 Nomor surat lain?\n\nNavigasi:\n*200.* Selanjutnya\n*300.* Sebelumnya\n*99.* Kembali ke menu utama\n\n_Balas Pesan ini!_',
+									mentions: [sender]
+								},
+								{ quoted: msg }
+							)
+							menuMessages.set(sentMsg.key.id, { param: `quran`, });
+						} else {
+							const sentMsg = await lenwy.sendMessage(
+								sender,{
+									text: '⚠ *Nomor*\n\nNavigasi:\n*400.* Kembali ke menu utama \n\n_Balas Pesan ini untuk kirim ulang!_',
+									mentions: [sender]
+								},
+								{ quoted: msg }
+							)
+							menuMessages.set(sentMsg.key.id, { param: `quran` });
+							return;
+						}
+					} catch (error) {
+						console.error(`Error:`, error);
+						lenwyreply(mess.error);
+					}
 				}
 			}
 		}
