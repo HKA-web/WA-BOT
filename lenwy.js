@@ -94,27 +94,6 @@ module.exports = async (lenwy, m) => {
 			throw err;
 		}
 	}
-
-	function arrowFromDeg(deg) {
-	  const arrows = ["⬆️", "↗️", "➡️", "↘️", "⬇️", "↙️", "⬅️", "↖️"];
-	  const index = Math.round(deg / 45) % 8;
-	  return arrows[index];
-	}
-
-	function directionToText(deg) {
-	  const directions = [
-		"Utara", 
-		"Timur Laut", 
-		"Timur", 
-		"Tenggara", 
-		"Selatan", 
-		"Barat Daya", 
-		"Barat", 
-		"Barat Laut"
-	  ];
-	  const index = Math.round(deg / 45) % 8;
-	  return directions[index];
-	}
 	
 	// Fungsi broadcast
 	async function broadcast(data, quotedMsg) {
@@ -156,8 +135,7 @@ module.exports = async (lenwy, m) => {
                    || quoted.extendedTextMessage?.text 
                    || quoted.imageMessage?.caption 
                    || ``;
-		const isMenu = quotedText.includes(`📋 MENU BOT`);
-		if (isMenu) {
+		if (quotedText.includes(`📋 MENU BOT`)) {
 			switch (body) {
 				case `1`:
 					try {
@@ -242,10 +220,10 @@ module.exports = async (lenwy, m) => {
 					try {
 						const sentMsg = await lenwy.sendMessage(
 							sender,{
-								text: '🕌 Bagikan Lokasimu?\n\nNavigasi:\n*99.* Kembali ke menu utama \n\n_Balas Pesan ini!_',
+								image: menuImage,
+								caption: religimenu,
 								mentions: [sender]
-							},
-							{ quoted: msg }
+							},{ quoted: msg }
 						)
 						menuMessages.set(sentMsg.key.id, { param: 'pray' });
 					} catch (err) {
@@ -269,6 +247,20 @@ module.exports = async (lenwy, m) => {
 					}
 					break;
 			  default: { lenwyreply(mess.default) }
+			}
+		} else if (quotedText.includes(`🕌 MENU RELIGI`)) {
+			switch (body) {
+				case `1`:
+					const sentMsg = await lenwy.sendMessage(
+						sender,{
+							text: '🕌 Bagikan Lokasimu?\n\nNavigasi:\n*99.* Kembali ke menu utama \n\n_Balas Pesan ini!_',
+							mentions: [sender]
+						},
+						{ quoted: msg }
+					)
+					menuMessages.set(sentMsg.key.id, { param: 'pray' });
+					break;
+				default: { lenwyreply(mess.default) }
 			}
 		}
     }
@@ -336,7 +328,7 @@ module.exports = async (lenwy, m) => {
 						for (let row of response) {
 							if (count >= 3) break;
 							const sentMsg = await lenwy.sendMessage(sender, {
-								text: `*📥 Download ${row.title} ?*\n\n_Balas ya Pesan ini!_`,
+								text: `*📥 Download ${row.title} ?*\n\n_Balas *Ya* Pesan ini!_`,
 								contextInfo: {
 									externalAdReply: {
 										title: row.title,
@@ -430,87 +422,70 @@ module.exports = async (lenwy, m) => {
 					)
 				} else {
 					let locationMessage = msg.message.locationMessage || null;
-					if (!locationMessage && msg.message.extendedTextMessage) {
-						locationMessage = msg.message.extendedTextMessage?.contextInfo?.quotedMessage?.locationMessage || null;
-					}
-					
-					if (!locationMessage) {
-						const sentMsg = await lenwy.sendMessage(
-							sender,{
-								text: '⚠ *Tag Lokasimu*\n\nNavigasi:\n*99.* Kembali ke menu utama \n\n_Balas Pesan ini untuk kirim ulang!_',
-								mentions: [sender]
-							},
-							{ quoted: msg }
-						)
-						menuMessages.set(sentMsg.key.id, { param: 'pray' });
-						return;
-					}
-
-					try {
-						await lenwyreply(mess.wait);
-
-						// Ambil latitude & longitude
-						const lat = locationMessage.degreesLatitude;
-						const lon = locationMessage.degreesLongitude;
-						const location = await openstreet(lat, lon);
-
+					if (locationMessage) {
 						try {
-							let data = [];
-							const row = await getJadwalSholat(lat, lon);
-							const qiblat = await getQiblaDirection(lat, lon);
-							const qiblatArrow = arrowFromDeg(qiblat);
-							const qiblatText = directionToText(qiblat);
+							await lenwyreply(mess.wait);
 
-							// default WIB
-							const timezone = row.Timezone || "Asia/Jakarta";
+							// Ambil latitude & longitude
+							const lat = locationMessage.degreesLatitude;
+							const lon = locationMessage.degreesLongitude;
+							const location = await openstreet(lat, lon);
 
-							// Ambil waktu sekarang (WIB)
-							const now = dayjs().tz(timezone);
+							try {
+								let data = [];
+								const row = await getJadwalSholat(lat, lon);
+								const qiblat = await getQiblaDirection(lat, lon);
 
-							// Ambil tanggal hari ini
-							const today = now.format("YYYY-MM-DD");
+								// default WIB
+								const timezone = row.Timezone || "Asia/Jakarta";
 
-							const times = {
-							  Imsak: dayjs.tz(`${today} ${row.Imsak}`, "YYYY-MM-DD HH:mm", timezone),
-							  Fajr: dayjs.tz(`${today} ${row.Fajr}`, "YYYY-MM-DD HH:mm", timezone),
-							  Dhuhr: dayjs.tz(`${today} ${row.Dhuhr}`, "YYYY-MM-DD HH:mm", timezone),
-							  Asr: dayjs.tz(`${today} ${row.Asr}`, "YYYY-MM-DD HH:mm", timezone),
-							  Maghrib: dayjs.tz(`${today} ${row.Maghrib}`, "YYYY-MM-DD HH:mm", timezone),
-							  Isha: dayjs.tz(`${today} ${row.Isha}`, "YYYY-MM-DD HH:mm", timezone),
-							};
+								// Ambil waktu sekarang (WIB)
+								const now = dayjs().tz(timezone);
 
-							const prayerOrder = ["Imsak", "Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
+								// Ambil tanggal hari ini
+								const today = now.format("YYYY-MM-DD");
 
-							// Deteksi waktu sholat aktif
-							let currentPrayer = null;
-							for (let i = 0; i < prayerOrder.length; i++) {
-								const thisKey = prayerOrder[i];
-								const nextKey = prayerOrder[i + 1] || prayerOrder[0]; // kalau sudah terakhir (Isha), lanjut ke Imsak
-								const thisTime = times[thisKey];
-								let nextTime = times[nextKey];
+								const times = {
+								  Imsak: dayjs.tz(`${today} ${row.Imsak}`, "YYYY-MM-DD HH:mm", timezone),
+								  Fajr: dayjs.tz(`${today} ${row.Fajr}`, "YYYY-MM-DD HH:mm", timezone),
+								  Dhuhr: dayjs.tz(`${today} ${row.Dhuhr}`, "YYYY-MM-DD HH:mm", timezone),
+								  Asr: dayjs.tz(`${today} ${row.Asr}`, "YYYY-MM-DD HH:mm", timezone),
+								  Maghrib: dayjs.tz(`${today} ${row.Maghrib}`, "YYYY-MM-DD HH:mm", timezone),
+								  Isha: dayjs.tz(`${today} ${row.Isha}`, "YYYY-MM-DD HH:mm", timezone),
+								};
 
-								// khusus kalau Isya ? Imsak, nextTime pakai hari berikutnya
-								if (thisKey === "Isha" && nextKey === "Imsak") {
-									nextTime = nextTime.add(1, "day");
+								const prayerOrder = ["Imsak", "Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
+
+								// Deteksi waktu sholat aktif
+								let currentPrayer = null;
+								for (let i = 0; i < prayerOrder.length; i++) {
+									const thisKey = prayerOrder[i];
+									const nextKey = prayerOrder[i + 1] || prayerOrder[0]; // kalau sudah terakhir (Isha), lanjut ke Imsak
+									const thisTime = times[thisKey];
+									let nextTime = times[nextKey];
+
+									// khusus kalau Isya ? Imsak, nextTime pakai hari berikutnya
+									if (thisKey === "Isha" && nextKey === "Imsak") {
+										nextTime = nextTime.add(1, "day");
+									}
+
+									if (now.isBetween(thisTime, nextTime)) {
+										currentPrayer = thisKey;
+										break;
+									}
+
+									// Debug
+									// console.log('coba', now.isBetween(thisTime, nextTime), thisTime.format("YYYY-MM-DD HH:mm"), nextTime.format("YYYY-MM-DD HH:mm"));
 								}
 
-								if (now.isBetween(thisTime, nextTime)) {
-									currentPrayer = thisKey;
-									break;
-								}
+								// fallback kalau tidak ketemu (misal sebelum imsak)
+								if (!currentPrayer) currentPrayer = "Imsak";
+								// console.log("Sekarang:", now.format("YYYY-MM-DD HH:mm"));
+								// console.log("Current prayer:", currentPrayer);
 
-								// Debug
-								// console.log('coba', now.isBetween(thisTime, nextTime), thisTime.format("YYYY-MM-DD HH:mm"), nextTime.format("YYYY-MM-DD HH:mm"));
-							}
-
-							// fallback kalau tidak ketemu (misal sebelum imsak)
-							if (!currentPrayer) currentPrayer = "Imsak";
-							// console.log("Sekarang:", now.format("YYYY-MM-DD HH:mm"));
-							// console.log("Current prayer:", currentPrayer);
-
-							// Format jadwal dengan highlight
-							const formatLine = (key, label, time) =>
-								`${key === currentPrayer ? "🟢" : "⚪"} *${label}:* ${time}`;
+								// Format jadwal dengan highlight
+								const formatLine = (key, label, time) =>
+									`${key === currentPrayer ? "🟢" : "⚪"} *${label}:* ${time}`;
 
 data.push(`📍 *Lokasi:* *${location.city}*\n*Negara:* *${location.country}*
 *Koordinat:* ${lat}, ${lon}
@@ -524,20 +499,29 @@ ${formatLine("Asr", "Ashar", row.Asr)}
 ${formatLine("Maghrib", "Maghrib", row.Maghrib)}
 ${formatLine("Isha", "Isya", row.Isha)}
 
-*Petuntuk arah kiblat dari sumbu utara:* ${qiblatArrow} ${qiblat.toFixed(2)}° (${qiblatText}).
-
 _Live Kiblat:_ https://qiblafinder.withgoogle.com/intl/ms/finder/ar
 `);
 
-							const result = data.join("\n\n"); // kasih jarak antar item
-							await lenwyreply(result);
+								const result = data.join("\n\n"); // kasih jarak antar item
+								await lenwyreply(result);
+							} catch (error) {
+								console.error("Error Aladhan:", error);
+								lenwyreply(mess.error);
+							}
 						} catch (error) {
-							console.error("Error Aladhan:", error);
+							console.error("Error Open Street Map:", error);
 							lenwyreply(mess.error);
 						}
-					} catch (error) {
-						console.error("Error Open Street Map:", error);
-						lenwyreply(mess.error);
+					} else {
+						const sentMsg = await lenwy.sendMessage(
+							sender,{
+								text: '⚠ *Tag Lokasimu*\n\nNavigasi:\n*99.* Kembali ke menu utama \n\n_Balas Pesan ini untuk kirim ulang!_',
+								mentions: [sender]
+							},
+							{ quoted: msg }
+						)
+						menuMessages.set(sentMsg.key.id, { param: 'pray' });
+						return;
 					}
 				}
 			} else if (menuInfo.param === `stiker`) {
