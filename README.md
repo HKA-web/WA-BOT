@@ -28,6 +28,10 @@ This is a temporary README.md, the new guide is in development and will this fil
 New guide link: https://baileys.wiki
 
 
+## library
+Do check out & run [@whiskeysockets/baileys](https://www.npmjs.com/package/@whiskeysockets/baileys) to see usage of the library.
+
+
 # Thanks To
 Lenwy [here](https://whatsapp.com/channel/0029VaGdzBSGZNCmoTgN2K0u).
 
@@ -38,7 +42,7 @@ Clone Project:
 git clone https://gitlab.com/hka-group/bot-whatsapp-bayleys.git
 ```
 
-Folder Project:
+Path Project:
 ```
 cd path/project
 ```
@@ -50,10 +54,10 @@ npm install
 
 Run
 ```
-node index
+npm start
 ```
 
-#Features
+# Features
 1. 🤖 Tanya AI
 2. ▶️ YouTube
 3. 🎵 TikTok

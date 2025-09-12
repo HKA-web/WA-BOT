@@ -50,6 +50,7 @@ const openstreet = require('./scrape/OpenStreetMap');
 module.exports = async (lenwy, m) => {
 	const maxLength = 4000; // batas karakter per pesan
 	const maxBatch = 30; // batas batch
+	const limit = 3;
     const msg = m.messages[0];
     if (!msg.message) return;
 
@@ -373,7 +374,7 @@ module.exports = async (lenwy, m) => {
 						const response = await usetubes(body);
 						let count = 0;
 						for (let row of response) {
-							if (count >= 3) break;
+							if (count >= limit) break;
 							const sentMsg = await lenwy.sendMessage(sender, {
 								text: `*📥 Download ${row.title} ?*\n\n_Balas *Ya* Pesan ini!_`,
 								contextInfo: {
