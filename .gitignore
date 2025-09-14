@@ -1,6 +1,5 @@
-LenwySesi/
-LenwySesi_rizal/
-LenwySesi_byu/
+session/
+session_donkey/
 node_modules/
-.~lock.broadcast.xlsx#
-tmp/
+images/
+!.gitkeep

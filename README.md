@@ -28,7 +28,7 @@ This is a temporary README.md, the new guide is in development and will this fil
 New guide link: https://baileys.wiki
 
 
-## library
+# Library
 Do check out & run [@whiskeysockets/baileys](https://www.npmjs.com/package/@whiskeysockets/baileys) to see usage of the library.
 
 
@@ -36,25 +36,32 @@ Do check out & run [@whiskeysockets/baileys](https://www.npmjs.com/package/@whis
 Lenwy [here](https://whatsapp.com/channel/0029VaGdzBSGZNCmoTgN2K0u).
 
 
-## Install
+# Install
 Clone Project:
 ```
 git clone https://gitlab.com/hka-group/bot-whatsapp-bayleys.git
 ```
 
-Path Project:
+Install yarn
 ```
-cd path/project
+npm install -g yarn
 ```
 
 Install Dependency:
 ```
-npm install
+yarn
 ```
 
-Run
+Run Project With Development
 ```
-npm start
+yarn run dev
+```
+
+Run Project With Production
+```
+yarn build
+
+yarn start
 ```
 
 # Features
