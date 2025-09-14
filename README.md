@@ -44,7 +44,7 @@ git clone https://gitlab.com/hka-group/bot-whatsapp-bayleys.git
 
 Install yarn
 ```
-npm install -g yarn
+yarn install
 ```
 
 Install Dependency:
@@ -57,21 +57,19 @@ Run Project With Development
 yarn run dev
 ```
 
-Run Project With Production
+build Project
 ```
 yarn build
 
 yarn start
 ```
 
-# Features
-1. 🤖 Tanya AI
-2. ▶️ YouTube
-3. 🎵 TikTok
-4. 💡 Quote
-5. 📢 Broadcast
-6. 🕌 Islamic Menu
-7. 🤔 Stiker
+Run Project With Production
+```
+yarn build
+
+yarn start
+```
 
 
 # License

@@ -1,16 +1,12 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "NodeNext",                   
-    "moduleResolution": "NodeNext",
-    "outDir": "dist",
-    "rootDir": ".",
-    "strict": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": "./dist"
   },
-  "include": ["src", "."],  // ⬅️ "../src" = src di root, "." = config
-  "exclude": ["node_modules"]
+  "include": ["index.ts", "application/**/*.ts"]
 }

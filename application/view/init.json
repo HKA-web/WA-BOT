@@ -1,0 +1,40 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Application Programming Interface",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/ping": {
+      "get": {
+        "tags": [
+          "WhatsApp Bot"
+        ],
+        "summary": "Check server status",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "string",
+                  "time": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error: Internal Server Error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
