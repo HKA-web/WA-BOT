@@ -35,39 +35,49 @@ Do check out & run [@whiskeysockets/baileys](https://www.npmjs.com/package/@whis
 # Thanks To
 Lenwy [here](https://whatsapp.com/channel/0029VaGdzBSGZNCmoTgN2K0u).
 
-
 # Install
+
+## Via Bat File
 Clone Project:
 ```
-git clone https://gitlab.com/hka-group/bot-whatsapp-bayleys.git
+git clone https://github.com/HKA-web/WA-BOT.git
 ```
 
-Install yarn
+Open install.bat.
+
+Open file cwd.bat:
+```
+yarn start
+```
+
+## Manual
+Clone Project:
+```
+git clone https://github.com/HKA-web/WA-BOT.git
+```
+
+Install yarn, , open file cwd.bat:
 ```
 yarn install
 ```
 
-Install Dependency:
+Install Dependency, , open file cwd.bat:
 ```
 yarn
 ```
 
-Run Project With Development
+Run Project With Development, , open file cwd.bat:
 ```
 yarn run dev
 ```
 
-build Project
+build Project, open file cwd.bat:
 ```
 yarn build
-
-yarn start
 ```
 
-Run Project With Production
+Run Project With Production, open file cwd.bat:
 ```
-yarn build
-
 yarn start
 ```
 

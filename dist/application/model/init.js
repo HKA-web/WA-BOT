@@ -1,9 +1,10 @@
 import { ping } from "./getstatus.js";
-export function setupApiDocs(routeServer) {
-    ping(routeServer);
+import { sendMessage } from "./sendmessage.js";
+export function setupApiDocs(app) {
+    ping(app);
+    sendMessage(app);
     /*
-    sendAudioMessage(routeServer);
-    sendImageMessage(routeServer);
-    sendMessage(routeServer);
+    sendAudioMessage(app);
+    sendImageMessage(app);
     */
 }

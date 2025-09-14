@@ -23,6 +23,67 @@
           }
         }
       }
+    },
+    "/send-messages": {
+      "post": {
+        "tags": ["WhatsApp Bot"],
+        "summary": "Send multiple WhatsApp messages",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "jid": {
+                      "type": "string",
+                      "example": "628123456789@s.whatsapp.net"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Halo, ini pesan otomatis!"
+                    }
+                  },
+                  "required": ["jid", "message"]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Messages sent result",
+            "content": {
+              "application/json": {
+                "example": {
+                  "results": [
+                    { "jid": "628123456789@s.whatsapp.net", "status": "success" },
+                    { "jid": "68561@s.whatsapp.net", "status": "error", "error": "Nomor tidak terdaftar di WhatsApp" }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "example": { "error": "Body harus berupa array pesan" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": { "error": "string" }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

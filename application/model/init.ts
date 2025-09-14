@@ -1,12 +1,13 @@
 import { Express } from "express";
 import { ping } from "./getstatus.js";
+import { sendMessage } from "./sendmessage.js";
 
 
-export function setupApiDocs(routeServer: Express) {
-  ping(routeServer);
+export function setupApiDocs(app: Express) {
+  ping(app);
+  sendMessage(app);
   /*
-  sendAudioMessage(routeServer);
-  sendImageMessage(routeServer);
-  sendMessage(routeServer);
+  sendAudioMessage(app);
+  sendImageMessage(app);
   */
 }
