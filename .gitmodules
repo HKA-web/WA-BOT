@@ -1,0 +1,3 @@
+[submodule "bin/nodejs"]
+	path = bin/nodejs
+	url = https://github.com/HKA-web/Node.js-Portable.git
