@@ -56,27 +56,29 @@ Clone Project:
 git clone https://github.com/HKA-web/WA-BOT.git
 ```
 
-Install yarn, , open file cwd.bat:
+Open file cwd.bat.
+
+Install yarn:
 ```
 yarn install
 ```
 
-Install Dependency, , open file cwd.bat:
+Install Dependency:
 ```
 yarn
 ```
 
-Run Project With Development, , open file cwd.bat:
+Run Project With Development:
 ```
 yarn run dev
 ```
 
-build Project, open file cwd.bat:
+Build Project:
 ```
 yarn build
 ```
 
-Run Project With Production, open file cwd.bat:
+Run Project With Production:
 ```
 yarn start
 ```

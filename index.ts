@@ -2,7 +2,7 @@ import express from "express";
 import swaggerUi from "swagger-ui-express";
 import fs from "fs";
 import { AppConfig } from "./application/config/app.config.js";
-import { Logger } from "./application/helper/logger.helper.js";
+import { Logger } from "./application/helper/app.helper.js";
 import { waController, ensureWA } from "./application/config/app.middleware.js";
 import { setupApiDocs } from "./application/model/init.js";
 

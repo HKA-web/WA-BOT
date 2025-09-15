@@ -34,15 +34,18 @@
             "application/json": {
               "schema": {
                 "type": "array",
+                "description": "Array pesan teks yang dikirim",
                 "items": {
                   "type": "object",
                   "properties": {
                     "jid": {
                       "type": "string",
+                      "description": "JID WA tujuan",
                       "example": "628123456789@s.whatsapp.net"
                     },
                     "message": {
                       "type": "string",
+                      "description": "Isi pesan teks",
                       "example": "Halo, ini pesan otomatis!"
                     }
                   },
@@ -79,6 +82,148 @@
             "content": {
               "application/json": {
                 "example": { "error": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/send-images": {
+      "post": {
+        "tags": ["WhatsApp Bot"],
+        "summary": "Send images to multiple WhatsApp users",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "description": "Array pesan gambar yang dikirim",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "jid": {
+                      "type": "string",
+                      "description": "JID WA tujuan",
+                      "example": "628123456789@s.whatsapp.net"
+                    },
+                    "image": {
+                      "type": "string",
+                      "description": "Image URL, local path, atau base64 string",
+                      "examples": {
+                        "url": { "value": "https://example.com/photo.jpg" },
+                        "local": { "value": "./uploads/photo.jpg" },
+                        "base64": { "value": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..." }
+                      }
+                    },
+                    "caption": {
+                      "type": "string",
+                      "description": "Caption opsional untuk gambar",
+                      "example": "Ini caption opsional untuk gambar"
+                    }
+                  },
+                  "required": ["jid", "image"]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Images sent result",
+            "content": {
+              "application/json": {
+                "example": {
+                  "results": [
+                    { "jid": "628123456789@s.whatsapp.net", "status": "success" },
+                    { "jid": "628987654321@s.whatsapp.net", "status": "error", "error": "Nomor tidak terdaftar di WhatsApp" }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "example": { "error": "Body harus berupa array gambar" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": { "error": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/send-audios": {
+      "post": {
+        "tags": ["WhatsApp Bot"],
+        "summary": "Send audio ke multiple WhatsApp Users",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "description": "Array audio message yang dikirim ke JID tertentu",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "jid": {
+                      "type": "string",
+                      "description": "JID WA tujuan",
+                      "example": "628123456789@s.whatsapp.net"
+                    },
+                    "audioUrl": {
+                      "type": "string",
+                      "description": "URL file audio yang akan dikirim",
+                      "example": "https://commondatastorage.googleapis.com/codeskulptor-assets/Evillaugh.ogg"
+                    },
+                    "ptt": {
+                      "type": "boolean",
+                      "description": "Apakah dikirim sebagai voice note, default false",
+                      "example": false
+                    }
+                  },
+                  "required": ["jid", "audioUrl"]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Hasil pengiriman audio per nomor",
+            "content": {
+              "application/json": {
+                "example": {
+                  "results": [
+                    { "jid": "628123456789@s.whatsapp.net", "status": "success" },
+                    { "jid": "628987654321@s.whatsapp.net", "status": "error", "error": "Nomor tidak terdaftar di WhatsApp" }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, misal body tidak array",
+            "content": {
+              "application/json": {
+                "example": { "error": "Array body dibutuhkan" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error, socket WA belum siap",
+            "content": {
+              "application/json": {
+                "example": { "error": "WhatsApp socket belum siap" }
               }
             }
           }

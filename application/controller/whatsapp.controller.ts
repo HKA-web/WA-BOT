@@ -12,7 +12,7 @@ import { Boom } from "@hapi/boom";
 import pino from "pino";
 import chalk from "chalk";
 import qrcode from "qrcode-terminal";
-import { Logger, question } from "../helper/logger.helper.js";
+import { Logger, question } from "../helper/app.helper.js";
 //import mainHandler from "../main.js"; // handler utama pesan masuk
 
 export class WhatsAppController {
