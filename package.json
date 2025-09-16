@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "tsc --noEmit && node --loader ts-node/esm index.ts",
+    "dev": "nodemon --config ./nodemon.json",
     "build-swagger": "node --loader ts-node/esm build-swagger.ts",
     "build": "tsc",
     "start": "node dist/index.js"
@@ -16,12 +16,16 @@
     "chalk": "^5.6.2",
     "express": "^5.1.0",
     "multer": "^2.0.2",
+    "mysql2": "^3.14.5",
+    "pg": "^8.16.3",
     "qrcode-terminal": "^0.12.0",
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@types/chalk": "^2.2.4",
+    "@types/dotenv": "^8.2.3",
     "@types/multer": "^2.0.0",
+    "@types/pg": "^8.15.5",
     "@types/qrcode-terminal": "^0.12.2",
     "@types/swagger-ui-express": "^4.1.8",
     "nodemon": "^3.0.3",

@@ -41,6 +41,8 @@ Lenwy [here](https://whatsapp.com/channel/0029VaGdzBSGZNCmoTgN2K0u).
 Clone Project:
 ```
 git clone https://github.com/HKA-web/WA-BOT.git
+git submodule update --init --recursive
+git pull --recurse-submodules
 ```
 
 Open install.bat.
@@ -54,6 +56,8 @@ yarn start
 Clone Project:
 ```
 git clone https://github.com/HKA-web/WA-BOT.git
+git submodule update --init --recursive
+git pull --recurse-submodules
 ```
 
 Open file cwd.bat.

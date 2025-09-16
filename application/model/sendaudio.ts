@@ -78,7 +78,7 @@ export function sendAudio(app: Express) {
                     }
 
                     results.push({ jid: user.jid, status: "success" });
-					await sleep(500);
+					await sleep();
                 } catch (err: unknown) {
                     results.push({
                         jid: user.jid,

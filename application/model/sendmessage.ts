@@ -1,7 +1,7 @@
 import { Express, Request, Response } from "express";
 import { waController, ensureWA, ensureRegisteredWA } from "../config/app.middleware.js";
 import { AnyMessageContent } from "@whiskeysockets/baileys";
-import { sendInChunks, sleep } from "../helper/app.helper.js";
+import { sendChunk, sleep } from "../helper/app.helper.js";
 
 export function sendMessage(app: Express) {
     app.post("/send-messages", ensureWA, ensureRegisteredWA, async (req: Request, res: Response) => {
@@ -34,16 +34,15 @@ export function sendMessage(app: Express) {
             }
 
             try {
-                await sendInChunks(
-					msg.message as string,
-					4000, // maksimal kata per batch
-					async (batchText) => {
-						await sock.sendMessage(user.jid, { text: batchText });
-					},
-					500 // delay optional
+				await sendChunk(
+				  String(msg.message).replace(/\\n/g, "\n"),
+				  async (batchText: string) => {
+					await sock.sendMessage(user.jid, { text: batchText });
+				  },
 				);
+				
                 results.push({ jid: user.jid, status: "success" });
-				await sleep(500);
+				await sleep();
             } catch (err: unknown) {
                 results.push({
                     jid: user.jid,

@@ -2,7 +2,7 @@ import express from "express";
 import swaggerUi from "swagger-ui-express";
 import fs from "fs";
 import { AppConfig } from "./application/config/app.config.js";
-import { Logger } from "./application/helper/logger.helper.js";
+import { Logger } from "./application/helper/app.helper.js";
 import { waController } from "./application/config/app.middleware.js";
 import { setupApiDocs } from "./application/model/init.js";
 const app = express();
@@ -27,5 +27,6 @@ setupApiDocs(app);
 app.listen(AppConfig.port, () => {
     Logger.info(`Server running at http://localhost:${AppConfig.port}`);
     Logger.info(`Swagger docs at http://localhost:${AppConfig.port}${AppConfig.swaggerPath}`);
-    Logger.info(`Check whatsapp session...`);
+    Logger.info(`Check whatsapp session`);
+    Logger.info(AppConfig.mess.wait);
 });

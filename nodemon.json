@@ -1,0 +1,5 @@
+{
+  "watch": ["application"],
+  "ext": "ts,js",
+  "exec": "tsc --noEmit && node --loader ts-node/esm index.ts"
+}

@@ -32,5 +32,6 @@ setupApiDocs(app);
 app.listen(AppConfig.port, () => {
     Logger.info(`Server running at http://localhost:${AppConfig.port}`);
     Logger.info(`Swagger docs at http://localhost:${AppConfig.port}${AppConfig.swaggerPath}`);
-    Logger.info(`Check whatsapp session...`);
+	Logger.info(`Check whatsapp session`);
+    Logger.info(AppConfig.mess.wait);
 });

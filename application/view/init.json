@@ -5,6 +5,283 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Generate new access token and refresh token for a user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": {
+                    "type": "string",
+                    "example": "44702311"
+                  }
+                },
+                "required": [
+                  "userId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token generated successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "accessToken": "eyJhbGciOiJIUzI1NiIsIn...",
+                  "refreshToken": "eyJhbGciOiJIUzI1NiIsIn...",
+                  "expiresAt": "2025-09-17T01:23:45.678Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing userId in request body"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Refresh expired access token using refresh token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": {
+                    "type": "string",
+                    "example": "44702311"
+                  },
+                  "refreshToken": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsIn..."
+                  }
+                },
+                "required": [
+                  "userId",
+                  "refreshToken"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token refreshed successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "accessToken": "eyJhbGciOiJIUzI1NiIsIn...",
+                  "refreshToken": "eyJhbGciOiJIUzI1NiIsIn...",
+                  "expiresAt": "2025-09-17T01:23:45.678Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid refresh token"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/querytool/pgsql": {
+      "post": {
+        "tags": [
+          "PostgreSQL Database Tool"
+        ],
+        "summary": "Run custom SQL query on PostgreSQL with pagination",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XUserIdHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "example": "SELECT * FROM users"
+                  },
+                  "skip": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "take": {
+                    "type": "integer",
+                    "example": 5
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Query executed successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "db": "pgsql",
+                  "skip": 0,
+                  "take": 5,
+                  "totalCount": 2,
+                  "schema": [
+                    {
+                      "name": "id",
+                      "type": "number"
+                    },
+                    {
+                      "name": "name",
+                      "type": "string"
+                    }
+                  ],
+                  "data": [
+                    {
+                      "id": 1,
+                      "name": "Alice"
+                    },
+                    {
+                      "id": 2,
+                      "name": "Bob"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized, invalid or missing token"
+          },
+          "500": {
+            "description": "Database error"
+          }
+        }
+      }
+    },
+    "/querytool/mysql": {
+      "post": {
+        "tags": [
+          "MySQL Database Tool"
+        ],
+        "summary": "Run custom SQL query on MySQL with pagination",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XUserIdHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "example": "SELECT * FROM users"
+                  },
+                  "skip": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "take": {
+                    "type": "integer",
+                    "example": 5
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Query executed successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "db": "mysql",
+                  "skip": 0,
+                  "take": 5,
+                  "totalCount": 2,
+                  "schema": [
+                    {
+                      "name": "id",
+                      "type": "number"
+                    },
+                    {
+                      "name": "name",
+                      "type": "string"
+                    }
+                  ],
+                  "data": [
+                    {
+                      "id": 1,
+                      "name": "Charlie"
+                    },
+                    {
+                      "id": 2,
+                      "name": "Diana"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized, invalid or missing token"
+          },
+          "500": {
+            "description": "Database error"
+          }
+        }
+      }
+    },
     "/ping": {
       "get": {
         "tags": [
@@ -294,6 +571,26 @@
             }
           }
         }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "parameters": {
+      "XUserIdHeader": {
+        "name": "X-User-Id",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "User ID yang login"
       }
     }
   }

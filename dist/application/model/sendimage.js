@@ -1,7 +1,7 @@
 import { waController, ensureWA, ensureRegisteredWA } from "../config/app.middleware.js";
-import { sendInChunks, sleep } from "../helper/app.helper.js";
-export function sendMessage(app) {
-    app.post("/send-messages", ensureWA, ensureRegisteredWA, async (req, res) => {
+import { sleep } from "../helper/app.helper.js";
+export function sendImage(app) {
+    app.post("/send-images", ensureWA, ensureRegisteredWA, async (req, res) => {
         const sock = waController.getSocket();
         const waUsers = req.waUsers;
         const results = [];
@@ -9,11 +9,11 @@ export function sendMessage(app) {
             const msg = Array.isArray(req.body)
                 ? req.body.find((m) => m.jid === user.jid)
                 : req.body;
-            if (!msg || !msg.message) {
+            if (!msg || !msg.image) {
                 results.push({
                     jid: user.jid,
                     status: "error",
-                    error: "Field 'message' wajib"
+                    error: "Field 'image' wajib (url/base64/path)"
                 });
                 continue;
             }
@@ -26,11 +26,24 @@ export function sendMessage(app) {
                 continue;
             }
             try {
-                await sendInChunks(msg.message, 4000, // maksimal kata per batch
-                async (batchText) => {
-                    await sock.sendMessage(user.jid, { text: batchText });
-                }, 500 // delay optional
-                );
+                let imageContent;
+                if (msg.image.startsWith("data:image")) {
+                    // Base64 → convert ke Buffer
+                    const base64Data = msg.image.split(",")[1];
+                    imageContent = Buffer.from(base64Data, "base64");
+                }
+                else if (msg.image.startsWith("http://") || msg.image.startsWith("https://")) {
+                    // URL
+                    imageContent = { url: msg.image };
+                }
+                else {
+                    // Anggap path lokal
+                    imageContent = { url: msg.image };
+                }
+                await sock.sendMessage(user.jid, {
+                    image: imageContent,
+                    caption: msg.caption || ""
+                });
                 results.push({ jid: user.jid, status: "success" });
                 await sleep(500);
             }
