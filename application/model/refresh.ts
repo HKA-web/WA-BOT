@@ -1,7 +1,6 @@
 import { Application, Request, Response } from "express";
 import { createToken, tokenStore } from "../helper/app.helper.js";
 
-// Middleware / route refresh token
 export function refreshTokenRoute(app: Application) {
   app.post("/auth/refresh", async (req: Request, res: Response) => {
     try {
@@ -12,11 +11,13 @@ export function refreshTokenRoute(app: Application) {
         return res.status(401).json({ error: "Invalid refresh token" });
       }
 
-      const newTokenData = createToken(userId);
+      // generate accessToken baru + update refreshToken
+      const newTokenData = createToken(userId, "refresh");
+
       return res.json({
-        accessToken: newTokenData.accessToken,
+        accessToken: newTokenData.accessToken,  // ✅ pastikan muncul
         refreshToken: newTokenData.refreshToken,
-        expiresAt: newTokenData.expiresAt,
+        expiresAt: newTokenData.expiresAt
       });
     } catch (err: any) {
       return res.status(500).json({ error: err.message });

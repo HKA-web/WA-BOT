@@ -4,16 +4,14 @@ import chalk from "chalk";
 import dotenv from 'dotenv';
 dotenv.config(); // Load variabel dari .env
 
-// === Token Store ===
-interface TokenData {
-  accessToken: string;
-  refreshToken: string;
-  expiresAt: number; // timestamp ms
+export interface TokenData {
+  accessToken?: string;   // dibuat saat refresh
+  refreshToken: string;   // wajib
+  expiresAt?: number;     // berlaku untuk accessToken
 }
 
 export const tokenStore: Record<string, TokenData> = {};
 
-// === Helper Generate Token ===
 function generateToken() {
   return crypto.randomBytes(32).toString("hex");
 }
@@ -173,11 +171,20 @@ export function mapRowsDynamic(
 }
 
 // === Generate Access + Refresh Token ===
-export function createToken(userId: string): TokenData {
-  const accessToken = generateToken();
+export function createToken(userId: string, type: "login" | "refresh" = "login"): TokenData {
   const refreshToken = generateToken();
-  const expiresAt = Date.now() + 5 * 60 * 1000; // 5 menit
-  tokenStore[userId] = { accessToken, refreshToken, expiresAt };
-  return tokenStore[userId];
-}
 
+  if (type === "login") {
+    // login hanya buat refreshToken
+    tokenStore[userId] = { refreshToken };
+    return tokenStore[userId];
+  } else {
+    // refresh → buat accessToken + update refreshToken lama
+    const expiresMinutes = Number(process.env.TOKEN_EXPIRED) || 5;
+    const accessToken = generateToken();
+    const expiresAt = Date.now() + expiresMinutes * 60 * 1000;
+
+    tokenStore[userId] = { ...tokenStore[userId], accessToken, refreshToken, expiresAt };
+    return tokenStore[userId];
+  }
+}

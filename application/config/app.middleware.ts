@@ -122,11 +122,13 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
 
   const token = bearerHeader.split(" ")[1];
   const tokenData = tokenStore[userId];
-console.log(token, tokenData, tokenData.accessToken === token);
+  console.log(token, tokenData, tokenData?.accessToken === token);
+
   if (!tokenData) return res.status(401).json({ error: "Invalid user or token" });
 
   if (tokenData.accessToken === token) {
-    if (tokenData.expiresAt > Date.now()) {
+    // ✅ cek dulu kalau expiresAt ada
+    if (tokenData.expiresAt && tokenData.expiresAt > Date.now()) {
       return next(); // token valid
     } else {
       return res.status(401).json({ error: "Access token expired", code: "TOKEN_EXPIRED" });
