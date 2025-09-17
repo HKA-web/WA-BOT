@@ -1,0 +1,22 @@
+import { createToken, tokenStore } from "../helper/app.helper.js";
+export function refreshTokenRoute(app) {
+    app.post("/auth/refresh", async (req, res) => {
+        try {
+            const { userId, refreshToken } = req.body;
+            const tokenData = tokenStore[userId];
+            if (!tokenData || tokenData.refreshToken !== refreshToken) {
+                return res.status(401).json({ error: "Invalid refresh token" });
+            }
+            // generate accessToken baru + update refreshToken
+            const newTokenData = createToken(userId, "refresh");
+            return res.json({
+                accessToken: newTokenData.accessToken, // ✅ pastikan muncul
+                refreshToken: newTokenData.refreshToken,
+                expiresAt: newTokenData.expiresAt
+            });
+        }
+        catch (err) {
+            return res.status(500).json({ error: err.message });
+        }
+    });
+}

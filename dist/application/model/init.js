@@ -2,9 +2,16 @@ import { ping } from "./getstatus.js";
 import { sendMessage } from "./sendmessage.js";
 import { sendImage } from "./sendimage.js";
 import { sendAudio } from "./sendaudio.js";
+import { pgQueryRoute, mysqlQueryRoute } from "./querytool.js";
+import { refreshTokenRoute } from "./refresh.js";
+import { loginRoute } from "./auth.js";
 export function setupApiDocs(app) {
     ping(app);
     sendMessage(app);
     sendImage(app);
     sendAudio(app);
+    pgQueryRoute(app);
+    mysqlQueryRoute(app);
+    refreshTokenRoute(app);
+    loginRoute(app);
 }

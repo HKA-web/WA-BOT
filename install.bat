@@ -39,12 +39,14 @@ echo.
 echo Pilih opsi:
 echo   1. Install dependencies (yarn install)
 echo   2. Build project (yarn build)
-echo   3. Keluar
-set /P choice=Choice [1-3]: 
+echo   3. Set ngrok authtoken
+echo   4. Keluar
+set /P choice=Choice [1-4]: 
 
 if "%choice%"=="1" goto INSTALL
 if "%choice%"=="2" goto BUILD
-if "%choice%"=="3" goto END
+if "%choice%"=="3" goto NGROK_AUTH
+if "%choice%"=="4" goto END
 
 echo Pilihan tidak valid.
 goto MENU
@@ -85,6 +87,20 @@ echo.
 echo Memulai proses build (yarn build)...
 echo -------------------------------------------------
 call :run_yarn build
+echo.
+pause
+goto MENU
+
+:NGROK_AUTH
+echo.
+echo Menjalankan ngrok authtoken setup...
+echo -------------------------------------------------
+if exist "%ROOT%node_modules\.bin\ngrok.cmd" (
+    "%ROOT%node_modules\.bin\ngrok.cmd" config add-authtoken 29n6p4A4htzGD7rJ06W1yAMDKom_5EvEY4ST9fyeqZ5SnxrGv
+) else (
+    echo [ERROR] ngrok tidak ditemukan di node_modules/.bin
+    echo Pastikan sudah install: yarn add ngrok -D
+)
 echo.
 pause
 goto MENU

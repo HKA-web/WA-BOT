@@ -45,7 +45,7 @@ export function sendImage(app) {
                     caption: msg.caption || ""
                 });
                 results.push({ jid: user.jid, status: "success" });
-                await sleep(500);
+                await sleep();
             }
             catch (err) {
                 results.push({

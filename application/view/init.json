@@ -10,7 +10,7 @@
         "tags": [
           "Authentication"
         ],
-        "summary": "Generate new access token and refresh token for a user",
+        "summary": "Generate new refresh token for a user",
         "requestBody": {
           "required": true,
           "content": {
@@ -36,9 +36,7 @@
             "content": {
               "application/json": {
                 "example": {
-                  "accessToken": "eyJhbGciOiJIUzI1NiIsIn...",
-                  "refreshToken": "eyJhbGciOiJIUzI1NiIsIn...",
-                  "expiresAt": "2025-09-17T01:23:45.678Z"
+                  "refreshToken": "eyJhbGciOiJIUzI1NiIsIn..."
                 }
               }
             }
@@ -57,7 +55,7 @@
         "tags": [
           "Authentication"
         ],
-        "summary": "Refresh expired access token using refresh token",
+        "summary": "Generate new access token using refresh token",
         "requestBody": {
           "required": true,
           "content": {

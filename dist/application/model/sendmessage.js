@@ -1,5 +1,5 @@
 import { waController, ensureWA, ensureRegisteredWA } from "../config/app.middleware.js";
-import { sendInChunks, sleep } from "../helper/app.helper.js";
+import { sendChunk, sleep } from "../helper/app.helper.js";
 export function sendMessage(app) {
     app.post("/send-messages", ensureWA, ensureRegisteredWA, async (req, res) => {
         const sock = waController.getSocket();
@@ -26,13 +26,11 @@ export function sendMessage(app) {
                 continue;
             }
             try {
-                await sendInChunks(msg.message, 4000, // maksimal kata per batch
-                async (batchText) => {
+                await sendChunk(String(msg.message).replace(/\\n/g, "\n"), async (batchText) => {
                     await sock.sendMessage(user.jid, { text: batchText });
-                }, 500 // delay optional
-                );
+                });
                 results.push({ jid: user.jid, status: "success" });
-                await sleep(500);
+                await sleep();
             }
             catch (err) {
                 results.push({

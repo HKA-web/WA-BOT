@@ -1,3 +1,4 @@
+import { tokenStore } from "../helper/app.helper.js";
 import dotenv from 'dotenv';
 dotenv.config(); // Load variabel dari .env
 export const AppConfig = {
@@ -14,3 +15,8 @@ export const AppConfig = {
     // Admin WA
     admin: (process.env.ADMIN_JIDS || '6285648007953@s.whatsapp.net').split(','),
 };
+export function getApiToken(userId) {
+    if (!userId)
+        return ""; // default kosong jika tidak ada userId
+    return tokenStore[userId]?.accessToken || "";
+}
