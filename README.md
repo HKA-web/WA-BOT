@@ -45,10 +45,42 @@ git submodule update --init --recursive
 git pull --recurse-submodules
 ```
 
+Rename file env.example.yaml > env.yaml.
+
+
+Edit file cwd.bat, And change this row.
+```
+:: Path ke Python
+set "PYTHON_HOME=<NAME PROJECT>\bin\Python312"
+```
+
 Open install.bat.
 
-Open file cwd.bat:
+Open file cwd.bat.
 ```
+===============================================
+ Portable Node.js + Yarn Environment
+-----------------------------------------------
+ Node exe path: "C:\WA-BOT\bin\nodejs\node.exe"
+-----------------------------------------------
+ Node Version: v20.18.0
+===============================================
+
+Pilih tindakan:
+  1. Buka interactive shell (cmd)
+  2. Jalankan "yarn start"
+  3. Keluar
+Choice [1-3]:1
+```
+
+Install pyodbc:
+```
+python -m pip install pyodbc
+```
+
+Next run this commad:
+```
+.\node_modules\.bin\ngrok config add-authtoken <YOUR-TOKEN> <--> "Skip this section if you do not want to set it."
 yarn start
 ```
 
@@ -60,7 +92,35 @@ git submodule update --init --recursive
 git pull --recurse-submodules
 ```
 
+Rename file env.example.yaml > env.yaml.
+
+Edit file cwd.bat, And change this row.
+```
+:: Path ke Python
+set "PYTHON_HOME=<NAME PROJECT>\bin\Python312"
+```
+
 Open file cwd.bat.
+```
+===============================================
+ Portable Node.js + Yarn Environment
+-----------------------------------------------
+ Node exe path: "C:\WA-BOT\bin\nodejs\node.exe"
+-----------------------------------------------
+ Node Version: v20.18.0
+===============================================
+
+Pilih tindakan:
+  1. Buka interactive shell (cmd)
+  2. Jalankan "yarn start"
+  3. Keluar
+Choice [1-3]:1
+```
+
+Install pyodbc:
+```
+python -m pip install pyodbc
+```
 
 Install yarn:
 ```
@@ -72,9 +132,14 @@ Install Dependency:
 yarn
 ```
 
+Run this commad.
+```
+.\node_modules\.bin\ngrok config add-authtoken <YOUR-TOKEN> <--> "Skip this section if you do not want to set it."
+```
+
 Run Project With Development:
 ```
-yarn run dev
+yarn dev
 ```
 
 Build Project:
@@ -86,6 +151,16 @@ Run Project With Production:
 ```
 yarn start
 ```
+
+<details>
+<summary>💡 Tips run service with NSSM</summary>
+
+- Pastikan PATH Node & Python sudah ditambahkan
+- Gunakan akun user dengan password
+- Pada tab log on isi dengan akun user level administrator
+
+</details>
+
 
 
 # License

@@ -1,3 +1,6 @@
 [submodule "bin/nodejs"]
 	path = bin/nodejs
 	url = https://github.com/HKA-web/Node.js-Portable.git
+[submodule "bin/python"]
+	path = bin/python
+	url = https://github.com/HKA-web/Python-Portable.git

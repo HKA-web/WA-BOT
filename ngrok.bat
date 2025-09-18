@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: --- Load PORT dari file .env ---
+:: --- Load PORT ---
 set "PORT_DEFAULT=3000"
 set "PORT="
 

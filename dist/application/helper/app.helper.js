@@ -1,8 +1,7 @@
 import crypto from "crypto";
 import readline from "readline";
 import chalk from "chalk";
-import dotenv from 'dotenv';
-dotenv.config(); // Load variabel dari .env
+import config from '../../config.js';
 export const tokenStore = {};
 function generateToken() {
     return crypto.randomBytes(32).toString("hex");
@@ -11,7 +10,7 @@ export const Logger = {
     info: (msg) => console.log(chalk.yellow.bold(`[INFO] ${msg}`)),
     error: (msg) => console.log(chalk.red.bold(`[ERROR] ${msg}`))
 };
-export function sleep(ms = Number(process.env.DELAY) || 500) {
+export function sleep(ms = config.whatsapp.delay ?? 500) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 export function question(query) {
@@ -26,7 +25,7 @@ export function question(query) {
         });
     });
 }
-export async function sendChunk(text, sendFunc, maxCharsPerBatch = Math.min(Number(process.env.MAX_CHAR) || 4000, 4000), delayMs = Number(process.env.DELAY) || 500, mode = process.env.SEND_CHUNK_MODE || "auto") {
+export async function sendChunk(text, sendFunc, maxCharsPerBatch = Math.min(config.whatsapp.max_char ?? 4000, 4000), delayMs = config.whatsapp.delay ?? 500, mode = config.whatsapp.send_chunk_mode || "auto") {
     let chunks = [];
     // === Pilih mode otomatis ===
     if (mode === "auto") {
@@ -155,7 +154,7 @@ export function createToken(userId, type = "login") {
     }
     else {
         // refresh → buat accessToken + update refreshToken lama
-        const expiresMinutes = Number(process.env.TOKEN_EXPIRED) || 5;
+        const expiresMinutes = config.whatsapp.token_expired ?? 5;
         const accessToken = generateToken();
         const expiresAt = Date.now() + expiresMinutes * 60 * 1000;
         tokenStore[userId] = { ...tokenStore[userId], accessToken, refreshToken, expiresAt };

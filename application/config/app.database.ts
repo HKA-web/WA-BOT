@@ -1,25 +1,30 @@
 import { Pool as PgPool } from "pg";
 import mysql from "mysql2/promise";
+// @ts-ignore
+import { sql2000Pool as sql2000BridgePool } from "../../sqlserver-pool.js";
+import config from '../../config.js';
 
-// PostgreSQL Pool
-const pgPool = new PgPool({
-  host: process.env.PG_HOST || "localhost",
-  user: process.env.PG_USER || "postgres",
-  password: process.env.PG_PASS || "",
-  database: process.env.PG_DB || "postgres",
-  port: Number(process.env.PG_PORT) || 5432,
-  max: Number(process.env.PG_CONNECT_MAX) || 20,
+export const pgPool = new PgPool({
+  host: config.database.pgsql.host ?? 'localhost',
+  user: config.database.pgsql.user ?? 'postgres',
+  password: config.database.pgsql.password ?? '111111',
+  database: config.database.pgsql.name ?? 'postgres',
+  port: config.database.pgsql.port ?? 5432,
+  max: config.database.pgsql.max ?? 20,
 });
 
-// MySQL Pool
-const mysqlPool = mysql.createPool({
-  host: process.env.MYSQL_HOST || "localhost",
-  user: process.env.MYSQL_USER || "root",
-  password: process.env.MYSQL_PASS || "",
-  database: process.env.MYSQL_DB || "testdb",
-  port: Number(process.env.MYSQL_PORT) || 3306,
+export const mysqlPool = mysql.createPool({
+  host: config.database.mysql.host ?? "localhost",
+  user: config.database.mysql.user ?? "root",
+  password: config.database.mysql.password ?? "",
+  database: config.database.mysql.name ?? "testdb",
+  port: config.database.mysql.port ?? 3306,
   waitForConnections: true,
-  connectionLimit: Number(process.env.MYSQL_CONNECT_MAX) || 20,
+  connectionLimit: config.database.mysql.max ?? 20,
 });
 
-export { pgPool, mysqlPool };
+export const sql2000Pool = {
+  query: async (query: string): Promise<any[]> => {
+    return await sql2000BridgePool.query(query);
+  }
+};

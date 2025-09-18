@@ -280,6 +280,92 @@
         }
       }
     },
+    "/querytool/sqlserver": {
+      "post": {
+        "tags": [
+          "SQL Server 2000 Database Tool"
+        ],
+        "summary": "Run custom SQL query on SQL Server 2000 with pagination",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XUserIdHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "example": "SELECT TOP 5 name FROM sysobjects WHERE xtype='U'"
+                  },
+                  "skip": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "take": {
+                    "type": "integer",
+                    "example": 5
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Query executed successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "db": "sqlserver",
+                  "skip": 0,
+                  "take": 5,
+                  "totalCount": 10,
+                  "schema": [
+                    {
+                      "name": "name",
+                      "type": "string"
+                    }
+                  ],
+                  "data": [
+                    {
+                      "name": "Users"
+                    },
+                    {
+                      "name": "Orders"
+                    },
+                    {
+                      "name": "Products"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized, invalid or missing token"
+          },
+          "500": {
+            "description": "Database error"
+          }
+        }
+      }
+    },
     "/ping": {
       "get": {
         "tags": [

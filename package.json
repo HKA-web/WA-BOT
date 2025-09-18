@@ -12,24 +12,26 @@
   },
   "dependencies": {
     "@types/express": "^5.0.3",
+    "@types/node": "^24.5.1",
     "@whiskeysockets/baileys": "^7.0.0-rc.2",
     "chalk": "^5.6.2",
     "express": "^5.1.0",
+    "msnodesqlv8": "^5.1.1",
+    "mssql": "^11.0.1",
     "multer": "^2.0.2",
     "mysql2": "^3.14.5",
     "ngrok": "^5.0.0-beta.2",
     "pg": "^8.16.3",
     "qrcode-terminal": "^0.12.0",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "yaml": "^2.8.1"
   },
   "devDependencies": {
     "@types/chalk": "^2.2.4",
-    "@types/dotenv": "^8.2.3",
     "@types/multer": "^2.0.0",
     "@types/pg": "^8.15.5",
     "@types/qrcode-terminal": "^0.12.2",
     "@types/swagger-ui-express": "^4.1.8",
-    "dotenv-cli": "^10.0.0",
     "nodemon": "^3.0.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"

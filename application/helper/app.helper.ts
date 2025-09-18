@@ -1,8 +1,7 @@
 import crypto from "crypto";
 import readline from "readline";
 import chalk from "chalk";
-import dotenv from 'dotenv';
-dotenv.config(); // Load variabel dari .env
+import config from '../../config.js';
 
 export interface TokenData {
   accessToken?: string;   // dibuat saat refresh
@@ -21,7 +20,7 @@ export const Logger = {
     error: (msg: string) => console.log(chalk.red.bold(`[ERROR] ${msg}`))
 };
 
-export function sleep(ms: number = Number(process.env.DELAY) || 500): Promise<void> {
+export function sleep(ms: number = config.whatsapp.delay ?? 500): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -42,9 +41,9 @@ export function question(query: string): Promise<string> {
 export async function sendChunk(
   text: string,
   sendFunc: (batchText: string) => Promise<void>,
-  maxCharsPerBatch: number = Math.min(Number(process.env.MAX_CHAR) || 4000, 4000),
-  delayMs: number = Number(process.env.DELAY) || 500,
-  mode: "word" | "char" | "auto" = (process.env.SEND_CHUNK_MODE as "word" | "char" | "auto") || "auto"
+  maxCharsPerBatch: number = Math.min(config.whatsapp.max_char ?? 4000, 4000),
+  delayMs: number = config.whatsapp.delay ?? 500,
+  mode: "word" | "char" | "auto" = (config.whatsapp.send_chunk_mode as "word" | "char" | "auto") || "auto"
 ) {
   let chunks: string[] = [];
 
@@ -180,7 +179,7 @@ export function createToken(userId: string, type: "login" | "refresh" = "login")
     return tokenStore[userId];
   } else {
     // refresh → buat accessToken + update refreshToken lama
-    const expiresMinutes = Number(process.env.TOKEN_EXPIRED) || 5;
+    const expiresMinutes = config.whatsapp.token_expired ?? 5;
     const accessToken = generateToken();
     const expiresAt = Date.now() + expiresMinutes * 60 * 1000;
 

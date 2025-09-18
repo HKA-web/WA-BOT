@@ -1,9 +1,7 @@
 import { WhatsAppController } from "../controller/whatsapp.controller.js";
 import { tokenStore } from "../helper/app.helper.js";
-import { pgPool, mysqlPool } from "./app.database.js";
+import { pgPool, mysqlPool, sql2000Pool } from "./app.database.js"; // tambahkan sql2000Pool
 import { getApiToken } from "./app.config.js"; // import getter
-import dotenv from 'dotenv';
-dotenv.config(); // Load variabel dari .env
 // Buat 1 instance global yang sama
 export const waController = new WhatsAppController();
 // Middleware memastikan WA siap
@@ -13,32 +11,26 @@ export async function ensureWA(req, res, next) {
         return res.status(500).json({ error: "Socket WA belum siap" });
     next();
 }
-// Middleware untuk cek apakah nomor terdaftar di WhatsApp
+// Middleware cek nomor WA
 export async function ensureRegisteredWA(req, res, next) {
     try {
         const sock = waController.getSocket();
-        if (!sock) {
+        if (!sock)
             return res.status(500).json({ error: "Socket WA belum siap" });
-        }
         let jids = [];
-        if (Array.isArray(req.body)) {
+        if (Array.isArray(req.body))
             jids = req.body.map((item) => item.jid).filter(Boolean);
-        }
-        else if (req.body.jid) {
+        else if (req.body.jid)
             jids = [req.body.jid];
-        }
-        else if (req.query.jid) {
+        else if (req.query.jid)
             jids = [req.query.jid.toString()];
-        }
-        if (jids.length === 0) {
+        if (jids.length === 0)
             return res.status(400).json({ error: "Nomor (jid) wajib disediakan" });
-        }
         const flat = [];
         for (const jid of jids) {
             if (jid.endsWith("@s.whatsapp.net")) {
                 const results = await sock.onWhatsApp(jid) || [];
-                const result = results[0];
-                flat.push({ jid, exists: result?.exists ?? false, type: "user" });
+                flat.push({ jid, exists: results[0]?.exists ?? false, type: "user" });
             }
             else if (jid.endsWith("@g.us")) {
                 try {
@@ -64,49 +56,53 @@ export async function ensureRegisteredWA(req, res, next) {
         res.status(500).json({ error: "Gagal cek nomor WA" });
     }
 }
+// ================================
 // Middleware pilih database
+// ================================
 export function dbMiddleware(req, _res, next) {
-    // default untuk PostgreSQL, tapi bisa diubah di route
     if (req.path.startsWith("/querytool/mysql")) {
-        req.db = mysqlPool; // instance
+        req.db = mysqlPool;
         req.dbType = "mysql";
     }
+    else if (req.path.startsWith("/querytool/sqlserver")) {
+        req.db = sql2000Pool;
+        req.dbType = "sqlserver";
+    }
     else {
-        req.db = pgPool; // instance
+        req.db = pgPool;
         req.dbType = "pgsql";
     }
     next();
 }
+// ================================
+// Bearer auth middleware
+// ================================
 export function bearerAuthMiddleware(req, res, next) {
     const authHeader = req.headers["authorization"];
     const userId = req.headers["x-user-id"];
-    if (!authHeader || !userId) {
+    if (!authHeader || !userId)
         return res.status(401).json({ error: "Missing Authorization or X-User-Id" });
-    }
     const token = authHeader.split(" ")[1];
     const validToken = getApiToken(userId);
-    if (!validToken)
-        return res.status(401).json({ error: "Invalid user or token" });
-    if (token !== validToken) {
+    if (!validToken || token !== validToken)
         return res.status(401).json({ error: "Invalid token" });
-    }
     next();
 }
+// ================================
+// Access token middleware
+// ================================
 export function authMiddleware(req, res, next) {
     const bearerHeader = req.headers["authorization"];
     const userId = req.headers["x-user-id"];
-    if (!bearerHeader || !userId) {
+    if (!bearerHeader || !userId)
         return res.status(401).json({ error: "Missing Authorization or X-User-Id" });
-    }
     const token = bearerHeader.split(" ")[1];
     const tokenData = tokenStore[userId];
-    console.log(token, tokenData, tokenData?.accessToken === token);
     if (!tokenData)
         return res.status(401).json({ error: "Invalid user or token" });
     if (tokenData.accessToken === token) {
-        // ✅ cek dulu kalau expiresAt ada
         if (tokenData.expiresAt && tokenData.expiresAt > Date.now()) {
-            return next(); // token valid
+            return next();
         }
         else {
             return res.status(401).json({ error: "Access token expired", code: "TOKEN_EXPIRED" });
