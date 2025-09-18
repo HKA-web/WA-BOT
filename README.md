@@ -51,7 +51,7 @@ Rename file env.example.yaml > env.yaml.
 Edit file cwd.bat, And change this row.
 ```
 :: Path ke Python
-set "PYTHON_HOME=<NAME PROJECT>\bin\Python312"
+set "PYTHON_HOME=<NAME PROJECT>\bin\python"
 ```
 
 Open install.bat.
@@ -97,7 +97,7 @@ Rename file env.example.yaml > env.yaml.
 Edit file cwd.bat, And change this row.
 ```
 :: Path ke Python
-set "PYTHON_HOME=<NAME PROJECT>\bin\Python312"
+set "PYTHON_HOME=<NAME PROJECT>\bin\python"
 ```
 
 Open file cwd.bat.

@@ -1,4 +1,6 @@
 session/
 session_donkey/
+session_byu/
 node_modules/
 env.yaml
+service.log

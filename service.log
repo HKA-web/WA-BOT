@@ -1,7 +1,0 @@
-yarn run v1.22.22
-$ node dist/index.js
-[INFO] Server running at http://localhost:3000
-[INFO] Swagger docs at http://localhost:3000/api-docs
-[INFO] Check whatsapp session
-[INFO] Tunggu sebentar...
-[INFO] WhatsApp connected successfully
